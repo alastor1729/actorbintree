@@ -150,7 +150,7 @@ class BinaryTreeNode(val elem: Int, initiallyRemoved: Boolean) extends Actor {
 
     case iReq @ Insert(requester, id, e) =>
       if (e == elem) {
-        removed = e == 0 // un-remove it, but not at 0 (root).  0 is always removed
+        removed = false // un-remove it, but not at 0 (root).  0 is always removed
         requester ! OperationFinished(id)
       }
       else { //don't care this node is removed or not
@@ -179,7 +179,7 @@ class BinaryTreeNode(val elem: Int, initiallyRemoved: Boolean) extends Actor {
       context.become(copying(children, false))
 
       //root 0 is always removed, but still need to reply OperationFinished(-1)
-      if (elem == 0) {
+      if (elem == 0 && removed) {
         self ! OperationFinished(-1)
       }
       else if (!removed) {
