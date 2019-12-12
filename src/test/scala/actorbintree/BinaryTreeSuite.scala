@@ -3,13 +3,12 @@
  */
 package actorbintree
 
-import akka.actor.{ Props, ActorRef, ActorSystem }
-import org.scalatest.{ BeforeAndAfterAll, FlatSpec }
-import akka.testkit.{ TestProbe, ImplicitSender, TestKit }
-import org.scalatest.Matchers
-import scala.util.Random
+import akka.actor.{ActorRef, ActorSystem, Props}
+import akka.testkit.{ImplicitSender, TestKit, TestProbe}
+import org.scalatest.{BeforeAndAfterAll, FunSuiteLike, Matchers}
+
 import scala.concurrent.duration._
-import org.scalatest.FunSuiteLike
+import scala.util.Random
 
 class BinaryTreeSuite(_system: ActorSystem) extends TestKit(_system) with FunSuiteLike with Matchers with BeforeAndAfterAll with ImplicitSender
 {
@@ -130,4 +129,5 @@ class BinaryTreeSuite(_system: ActorSystem) extends TestKit(_system) with FunSui
     }
     receiveN(requester, ops, expectedReplies)
   }
+
 }
