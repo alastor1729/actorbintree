@@ -75,8 +75,8 @@ class BinaryTreeSet extends Actor {
   // optional
   /** Accepts `Operation` and `GC` messages. */
   // TODO - Part 1:
-  val normal: Receive = LoggingReceive {
-    case op: Operation => root.forward(op)
+  val normal: Receive = {
+    case op: Operation => root ! op
 
     case GC =>
       val newRoot = createRoot
@@ -91,13 +91,17 @@ class BinaryTreeSet extends Actor {
     * all non-removed elements into.
     */
   // TODO - Part 2:
-  def garbageCollecting(newRoot: ActorRef): Receive = LoggingReceive {
+  def garbageCollecting(newRoot: ActorRef): Receive = {
     case CopyFinished =>
-      println("Copy done !!!!")
+      //TODO - debug why below logic does not work!!
+//      root = newRoot
+//      context.unbecome()
+//      pendingQueue.foreach { root.forward(_) }
+//      pendingQueue = Queue.empty
+      pendingQueue.foreach { newRoot ! _ }
+      pendingQueue = Queue.empty
       root = newRoot
       context.unbecome()
-      pendingQueue.foreach { root.forward(_) }
-      pendingQueue = Queue.empty
 
     case op: Operation =>
       pendingQueue = pendingQueue.enqueue(op)
@@ -174,7 +178,7 @@ class BinaryTreeNode(val elem: Int, initiallyRemoved: Boolean) extends Actor {
       }
 
     case copyMsg @ CopyTo(newRoot) =>
-      println(s"Start copying in $elem ......")
+      //println(s"Start copying in $elem ......")
       val children = subtrees.values.toSet
       context.become(copying(children, false))
 
@@ -194,9 +198,9 @@ class BinaryTreeNode(val elem: Int, initiallyRemoved: Boolean) extends Actor {
     * `insertConfirmed` tracks whether the copy of this node to the new tree has been confirmed.
     */
   // TODO - Part 4:
-  def copying(expected: Set[ActorRef], insertConfirmed: Boolean): Receive = LoggingReceive {
+  def copying(expected: Set[ActorRef], insertConfirmed: Boolean): Receive = {
     case OperationFinished(-1) =>  //copy self is done
-      println(s"Copy $elem is done...")
+      //println(s"Copy $elem is done...")
       if (expected.isEmpty) {  //both copy self and copy children is done
         context.parent ! CopyFinished
         self ! PoisonPill
@@ -205,7 +209,7 @@ class BinaryTreeNode(val elem: Int, initiallyRemoved: Boolean) extends Actor {
       }
 
     case CopyFinished =>
-      println(s"Copy child of $elem is done...")
+      //println(s"Copy child of $elem is done...")
       val newExpected = expected.filterNot(_ == sender)
       if (newExpected.isEmpty && insertConfirmed) { //both copy self and copy children is done
         context.parent ! CopyFinished
