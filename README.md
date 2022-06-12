@@ -1,4 +1,4 @@
-# actorbintree
+# Akka Actors Binary Tree
 
 ## Resource:
 https://www.edx.org/course/programming-reactive-systems
